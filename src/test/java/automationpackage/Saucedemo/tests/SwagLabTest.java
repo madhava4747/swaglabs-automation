@@ -1,128 +1,136 @@
 package automationpackage.Saucedemo.tests;
 
-import org.openqa.selenium.By;
 import org.testng.Assert;
 import org.testng.SkipException;
 import org.testng.annotations.DataProvider;
-import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import io.qameta.allure.*;
+
 import automationpackage.Saucedemo.base.BaseTest;
-import automationpackage.Saucedemo.utils.*;
 import automationpackage.Saucedemo.pages.swagpages.*;
+import automationpackage.Saucedemo.utils.ExcelUtil;
 
 @Epic("Swag Labs")
 @Feature("End-to-End Purchase Flow")
-//@Listeners(automationpackage.Saucedemo.listeners.TestExecutionLogger.class)
 public class SwagLabTest extends BaseTest {
 
     /* =========================
        DATA PROVIDER
     ========================== */
-	@DataProvider(name = "excelData", parallel = true)
-	public Object[][] excelDataProvider() {
-	    return ExcelUtil.getTestData(
-	    		"testdata/SwagLabsData.xlsx",
-	    	    "Purchase"
-	    );
-	}
-
+    @DataProvider(name = "excelData", parallel = true)
+    public Object[][] excelDataProvider() {
+        return ExcelUtil.getTestData(
+                "testdata/SwagLabsData.xlsx",
+                "Purchase"
+        );
+    }
 
     /* =========================
        MAIN E2E TEST
     ========================== */
-	
-	@Test(dataProvider = "excelData")
-	@Story("User completes purchase flow")
-	public void verifyCompletePurchaseFlow(
-	        String username,
-	        String password,
-	        String firstName,
-	        String lastName,
-	        String zip,
-	        String severity,
-	        String expectedResult) {
+    @Test(dataProvider = "excelData")
+    @Story("User completes purchase flow")
+    public void verifyCompletePurchaseFlow(
+            String username,
+            String password,
+            String firstName,
+            String lastName,
+            String zip,
+            String severity,
+            String expectedResult) {
 
-		try{
-			
+        // -------- Allure Severity --------
+        setAllureSeverity(severity);
 
-	    // -------- Allure Severity --------
-	    SeverityLevel allureSeverity;
+        // -------- Login --------
+        LoginPage loginPage = new LoginPage(getDriver());
+        loginPage.login(username, password);
 
-	    switch (severity.toLowerCase()) {
-	        case "blocker":
-	            allureSeverity = SeverityLevel.BLOCKER;
-	            break;
-	        case "critical":
-	            allureSeverity = SeverityLevel.CRITICAL;
-	            break;
-	        case "minor":
-	            allureSeverity = SeverityLevel.MINOR;
-	            break;
-	        case "normal":
-	            allureSeverity = SeverityLevel.NORMAL;
-	            break;
-	        default:
-	            allureSeverity = SeverityLevel.TRIVIAL;
-	    }
-	    Allure.label("severity", allureSeverity.name().toLowerCase());
+        // -------- NEGATIVE SCENARIO --------
+        if (expectedResult.equalsIgnoreCase("ERROR")) {
 
-	    // -------- Login --------
-	    LoginPage loginPage = new LoginPage(getDriver());
-	    loginPage.login(username, password);
+            Allure.step("Validating negative login scenario");
 
-	    if (expectedResult.equalsIgnoreCase("ERROR")) {
+            Assert.assertTrue(
+                    loginPage.isErrorDisplayed(),
+                    "Expected login error message but it was not displayed"
+            );
 
-	        Assert.assertTrue(
-	            loginPage.isErrorDisplayed(),
-	            "Expected login error but error message was NOT shown"
-	        );
+            Allure.step("Negative login scenario validated successfully");
+            return; // ✅ PASS the test
+        }
 
-	        // stop test here
-	        throw new AssertionError(
-	            "Negative login scenario validated (intentional failure)"
-	        );
+        // -------- Products --------
+        ProductPage productPage = new ProductPage(getDriver());
+        Assert.assertTrue(
+                productPage.isDisplayed(),
+                "Products page not displayed after login"
+        );
 
-	        // ❌ Force this test to FAIL (because this is a defect validation)
-	        //Assert.fail("Login failed as expected for invalid credentials");
-	    }
-	    // -------- Products --------
-	    ProductPage productPage = new ProductPage(getDriver());
-	    Assert.assertTrue(
-	        productPage.isDisplayed(),
-	        "Products page not displayed after login"
-	    );
+        productPage.addProductToCart();
+        productPage.openCart();
 
-	    productPage.addProductToCart();
-	    productPage.openCart();
+        // -------- Cart --------
+        CartPage cartPage = new CartPage(getDriver());
+        Assert.assertTrue(
+                cartPage.isDisplayed(),
+                "Cart page not displayed"
+        );
+        cartPage.clickCheckout();
 
-	    // -------- Cart --------
-	    CartPage cartPage = new CartPage(getDriver());
-	    Assert.assertTrue(cartPage.isDisplayed(), "Cart page not displayed");
-	    cartPage.clickCheckout();
+        // -------- Checkout --------
+        CheckoutPage checkoutPage = new CheckoutPage(getDriver());
+        Assert.assertTrue(
+                checkoutPage.isDisplayed(),
+                "Checkout page not displayed"
+        );
 
-	    // -------- Checkout --------
-	    CheckoutPage checkoutPage = new CheckoutPage(getDriver());
-	    Assert.assertTrue(checkoutPage.isDisplayed(), "Checkout page not displayed");
+        checkoutPage.enterCheckoutDetails(firstName, lastName, zip);
+        checkoutPage.clickContinue();
 
-	    checkoutPage.enterCheckoutDetails(firstName, lastName, zip);
-	    checkoutPage.clickContinue();
+        // -------- Overview --------
+        OverviewPage overviewPage = new OverviewPage(getDriver());
+        Assert.assertTrue(
+                overviewPage.isDisplayed(),
+                "Overview page not displayed"
+        );
+        overviewPage.finishOrder();
 
-	    // -------- Overview --------
-	    OverviewPage overviewPage = new OverviewPage(getDriver());
-	    Assert.assertTrue(overviewPage.isDisplayed(), "Overview page not displayed");
-	    overviewPage.finishOrder();
+        // -------- Complete --------
+        CompletePage completePage = new CompletePage(getDriver());
+        Assert.assertEquals(
+                completePage.getSuccessMessage(),
+                "Thank you for your order!",
+                "Order confirmation message mismatch"
+        );
 
-	    // -------- Complete --------
-	    CompletePage completePage = new CompletePage(getDriver());
-	    Assert.assertEquals(
-	        completePage.getSuccessMessage(),
-	        "Thank you for your order!",
-	        "Order confirmation message mismatch"
-	    );
-	}
-catch (Exception E){
-	System.out.println("Failed");
+        Allure.step("Order placed successfully");
+    }
+
+    /* =========================
+       ALLURE SEVERITY HELPER
+    ========================== */
+    private void setAllureSeverity(String severity) {
+        SeverityLevel level;
+
+        switch (severity.toLowerCase()) {
+            case "blocker":
+                level = SeverityLevel.BLOCKER;
+                break;
+            case "critical":
+                level = SeverityLevel.CRITICAL;
+                break;
+            case "minor":
+                level = SeverityLevel.MINOR;
+                break;
+            case "normal":
+                level = SeverityLevel.NORMAL;
+                break;
+            default:
+                level = SeverityLevel.TRIVIAL;
+        }
+
+        Allure.label("severity", level.name().toLowerCase());
+    }
 }
-	}
