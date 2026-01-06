@@ -120,35 +120,4 @@ public class SwagLabTest extends BaseTest {
 	    );
 	}
 
-
-    /* =========================
-       BROKEN TEST (DEMO)
-    ========================== */
-    @Test
-    @Severity(SeverityLevel.MINOR)
-    @Story("Broken test demo")
-    public void brokenTestDemo() {
-        // ❌ No assertion, unexpected exception
-        getDriver().findElement(By.id("this-element-does-not-exist"));
-    }
-
-    /* =========================
-       SKIPPED TEST (DEMO)
-    ========================== */
-    @Test
-    @Severity(SeverityLevel.TRIVIAL)
-    @Story("Skipped test demo")
-    public void skippedTestDemo() {
-        throw new SkipException("Feature not ready – skipping test");
-    }
-    @Test
-    public void resourceDebugTest() {
-        var is = getClass()
-            .getClassLoader()
-            .getResourceAsStream("testdata/SwagLabsData.xlsx");
-
-        System.out.println("InputStream = " + is);
-        Assert.assertNotNull(is, "Excel file NOT found in classpath");
-    }
-
 }
