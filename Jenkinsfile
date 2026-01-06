@@ -29,14 +29,18 @@ pipeline {
 
     post {
         always {
-            // Publish Allure Report (OLD PLUGIN SYNTAX)
-            allure resultsPath: 'target/allure-results'
+            step([
+                $class: 'AllureReportPublisher',
+                results: [[path: 'target/allure-results']]
+            ])
 
             echo 'Pipeline execution finished'
         }
+
         success {
             echo 'Build SUCCESS'
         }
+
         failure {
             echo 'Build FAILED'
         }
