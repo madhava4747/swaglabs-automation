@@ -25,15 +25,19 @@ pipeline {
                 sh 'mvn test'
             }
         }
+
+        stage('Generate Allure Report') {
+            steps {
+                sh '''
+                    allure generate target/allure-results -o target/allure-report --clean
+                '''
+            }
+        }
     }
 
     post {
         always {
-            step([
-                $class: 'AllureReportPublisher',
-                results: [[path: 'target/allure-results']]
-            ])
-
+            archiveArtifacts artifacts: 'target/allure-report/**', fingerprint: true
             echo 'Pipeline execution finished'
         }
 
