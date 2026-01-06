@@ -8,9 +8,11 @@ pipeline {
 
     stages {
 
-        stage('Checkout') {
+        stage('Checkout Code') {
             steps {
-                checkout scm
+                git branch: 'main',
+                    url: 'https://github.com/madhava4747/swaglabs-automation.git',
+                    credentialsId: 'github-creds'
             }
         }
 
@@ -28,23 +30,25 @@ pipeline {
 
         stage('Generate Allure Report') {
             steps {
-                sh '''
-                    allure generate target/allure-results -o target/allure-report --clean
-                '''
+                sh 'allure generate target/allure-results --clean -o target/allure-report'
             }
         }
     }
 
     post {
         always {
-            archiveArtifacts artifacts: 'target/allure-report/**', fingerprint: true
+            publishHTML([
+                reportDir: 'target/allure-report',
+                reportFiles: 'index.html',
+                reportName: 'Allure Test Report',
+                keepAll: true,
+                alwaysLinkToLastBuild: true
+            ])
             echo 'Pipeline execution finished'
         }
-
         success {
             echo 'Build SUCCESS'
         }
-
         failure {
             echo 'Build FAILED'
         }
