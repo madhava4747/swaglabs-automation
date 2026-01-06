@@ -27,6 +27,11 @@ pipeline {
                 sh 'mvn test'
             }
         }
+         stage('Allure Report') {
+        steps {
+            allure results: [[path: 'target/allure-results']]
+        }
+    }
     }
 
     post {
