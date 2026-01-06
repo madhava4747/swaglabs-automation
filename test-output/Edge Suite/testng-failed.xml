@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="Failed suite [Edge Suite]">
+  <parameter name="browser" value="edge"/>
+  <listeners>
+    <listener class-name="maddy.selproject.SwagLab.listeners.TestExecutionLogger"/>
+  </listeners>
+  <test thread-count="5" name="Edge Tests(failed)">
+    <classes>
+      <class name="maddy.selproject.SwagLab.tests.SwagLabTest">
+        <methods>
+          <include name="tearDown"/>
+          <include name="verifyCompletePurchaseFlow" invocation-numbers="2"/>
+          <include name="setup"/>
+          <include name="skippedTestDemo"/>
+          <include name="setupAllureEnvironment"/>
+          <include name="brokenTestDemo"/>
+        </methods>
+      </class> <!-- maddy.selproject.SwagLab.tests.SwagLabTest -->
+    </classes>
+  </test> <!-- Edge Tests(failed) -->
+</suite> <!-- Failed suite [Edge Suite] -->

@@ -1,0 +1,14 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.1.dtd" >
+<suite name="SauceDemo Suite" parallel="methods" thread-count="2">
+
+    <listeners>
+        <listener class-name="automationpackage.Saucedemo.listeners.TestExecutionLogger"/>
+    </listeners>
+
+    <test name="E2E Tests">
+        <classes>
+            <class name="automationpackage.Saucedemo.tests.SwagLabTest"/>
+        </classes>
+    </test>
+
+</suite>

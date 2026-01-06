@@ -1,0 +1,22 @@
+[
+  {
+    "name": "Assertion Failures",
+    "matchedStatuses": ["failed"],
+    "messageRegex": ".*AssertionError.*"
+  },
+  {
+    "name": "Element Not Found",
+    "matchedStatuses": ["failed"],
+    "messageRegex": ".*NoSuchElementException.*"
+  },
+  {
+    "name": "Timeout Issues",
+    "matchedStatuses": ["failed"],
+    "messageRegex": ".*TimeoutException.*"
+  },
+  {
+    "name": "Stale Element Issues",
+    "matchedStatuses": ["failed"],
+    "messageRegex": ".*StaleElementReferenceException.*"
+  }
+]
