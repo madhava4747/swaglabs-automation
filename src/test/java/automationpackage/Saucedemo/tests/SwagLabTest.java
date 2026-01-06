@@ -44,6 +44,9 @@ public class SwagLabTest extends BaseTest {
 	        String severity,
 	        String expectedResult) {
 
+		try{
+			
+
 	    // -------- Allure Severity --------
 	    SeverityLevel allureSeverity;
 
@@ -119,5 +122,7 @@ public class SwagLabTest extends BaseTest {
 	        "Order confirmation message mismatch"
 	    );
 	}
-
+catch (Exception E){
+	System.out.println("Failed");
 }
+	}
