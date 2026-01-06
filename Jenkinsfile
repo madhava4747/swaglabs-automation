@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    options {
+        timestamps()
+    }
+
     tools {
         maven 'Maven-LOCAL'
         jdk 'JDK-Local'
@@ -8,11 +12,9 @@ pipeline {
 
     stages {
 
-        stage('Checkout Code') {
+        stage('Checkout') {
             steps {
-                git branch: 'main',
-                    url: 'https://github.com/madhava4747/swaglabs-automation.git',
-                    credentialsId: 'github-creds'
+                checkout scm
             }
         }
 
@@ -27,15 +29,13 @@ pipeline {
                 sh 'mvn test'
             }
         }
-         stage('Allure Report') {
-        steps {
-            allure results: [[path: 'target/allure-results']]
-        }
-    }
     }
 
     post {
         always {
+            allure([
+                results: [[path: 'target/allure-results']]
+            ])
             echo 'Pipeline execution finished'
         }
         success {
