@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    options {
-        timestamps()
-    }
-
     tools {
         maven 'Maven-LOCAL'
         jdk 'JDK-Local'
@@ -33,9 +29,9 @@ pipeline {
 
     post {
         always {
-            allure([
-                results: [[path: 'target/allure-results']]
-            ])
+            // Publish Allure Report (OLD PLUGIN SYNTAX)
+            allure resultsPath: 'target/allure-results'
+
             echo 'Pipeline execution finished'
         }
         success {
