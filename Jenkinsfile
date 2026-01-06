@@ -41,6 +41,7 @@ pipeline {
                 reportDir: 'target/allure-report',
                 reportFiles: 'index.html',
                 reportName: 'Allure Test Report',
+                allowMissing: false,          // ✅ REQUIRED FIX
                 keepAll: true,
                 alwaysLinkToLastBuild: true
             ])
