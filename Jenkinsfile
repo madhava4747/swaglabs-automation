@@ -18,23 +18,22 @@ pipeline {
 
         stage('Clean & Compile') {
             steps {
-                sh 'mvn clean compile'
+                bat 'mvn clean compile'
             }
         }
 
         stage('Run Tests') {
             steps {
-                sh 'mvn test'
+                bat 'mvn test'
             }
         }
 
         stage('Generate Allure Report') {
             steps {
-                sh '''
+                bat '''
                 if exist target\\allure-report rmdir /s /q target\\allure-report
                 if exist target\\allure-results rmdir /s /q target\\allure-results
-                mvn test
-                allure generate target/allure-results --clean -o target/allure-report
+                allure generate target\\allure-results --clean -o target\\allure-report
                 '''
             }
         }
