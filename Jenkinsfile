@@ -16,24 +16,20 @@ pipeline {
             }
         }
 
-        stage('Clean & Compile') {
-            steps {
-                bat 'mvn clean compile'
-            }
-        }
-
         stage('Run Tests') {
             steps {
-                bat 'mvn test'
+                sh '''
+                    mvn clean test \
+                    -DsuiteXmlFile=testng.xml
+                '''
             }
         }
 
         stage('Generate Allure Report') {
             steps {
-                bat '''
-                if exist target\\allure-report rmdir /s /q target\\allure-report
-                if exist target\\allure-results rmdir /s /q target\\allure-results
-                allure generate target\\allure-results --clean -o target\\allure-report
+                sh '''
+                    allure generate target/allure-results \
+                    -o target/allure-report --clean
                 '''
             }
         }
@@ -42,13 +38,7 @@ pipeline {
     post {
         always {
             archiveArtifacts artifacts: 'target/allure-report/**', fingerprint: true
-            echo 'Allure report archived successfully'
-        }
-        success {
-            echo 'Build SUCCESS'
-        }
-        failure {
-            echo 'Build FAILED'
+            echo 'Pipeline finished'
         }
     }
 }
