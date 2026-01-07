@@ -11,8 +11,8 @@ pipeline {
         stage('Checkout Code') {
             steps {
                 git branch: 'main',
-                    url: 'https://github.com/madhava4747/swaglabs-automation.git',
-                    credentialsId: 'github-creds'
+                    url: 'git@github.com:madhava4747/swaglabs-automation.git',
+                    credentialsId: 'github-ssh'
             }
         }
 
@@ -24,7 +24,7 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                bat 'mvn test'
+                bat 'mvn test -DsuiteXmlFile=testng.xml'
             }
         }
 
@@ -32,7 +32,6 @@ pipeline {
             steps {
                 bat '''
                 if exist target\\allure-report rmdir /s /q target\\allure-report
-                if exist target\\allure-results rmdir /s /q target\\allure-results
                 allure generate target\\allure-results --clean -o target\\allure-report
                 '''
             }
@@ -43,12 +42,6 @@ pipeline {
         always {
             archiveArtifacts artifacts: 'target/allure-report/**', fingerprint: true
             echo 'Allure report archived successfully'
-        }
-        success {
-            echo 'Build SUCCESS'
-        }
-        failure {
-            echo 'Build FAILED'
         }
     }
 }
