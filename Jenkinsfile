@@ -24,9 +24,7 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                bat '''
-                mvn test -DsuiteXmlFile=testng.xml
-                '''
+                bat 'mvn test'
             }
         }
 
@@ -34,6 +32,7 @@ pipeline {
             steps {
                 bat '''
                 if exist target\\allure-report rmdir /s /q target\\allure-report
+                if exist target\\allure-results rmdir /s /q target\\allure-results
                 allure generate target\\allure-results --clean -o target\\allure-report
                 '''
             }
