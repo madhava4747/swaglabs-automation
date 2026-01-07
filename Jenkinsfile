@@ -11,8 +11,8 @@ pipeline {
         stage('Checkout Code') {
             steps {
                 git branch: 'main',
-                    url: 'git@github.com:madhava4747/swaglabs-automation.git',
-                    credentialsId: 'github-ssh'
+                    url: 'https://github.com/madhava4747/swaglabs-automation.git',
+                    credentialsId: 'github-creds'
             }
         }
 
@@ -32,7 +32,11 @@ pipeline {
             steps {
                 bat '''
                 if exist target\\allure-report rmdir /s /q target\\allure-report
-                allure generate target\\allure-results --clean -o target\\allure-report
+                if exist target\\allure-results (
+                    allure generate target\\allure-results --clean -o target\\allure-report
+                ) else (
+                    echo "No Allure results found"
+                )
                 '''
             }
         }
@@ -41,7 +45,13 @@ pipeline {
     post {
         always {
             archiveArtifacts artifacts: 'target/allure-report/**', fingerprint: true
-            echo 'Allure report archived successfully'
+            echo 'Pipeline completed'
+        }
+        success {
+            echo 'Build SUCCESS'
+        }
+        failure {
+            echo 'Build FAILED'
         }
     }
 }
