@@ -30,22 +30,20 @@ pipeline {
 
         stage('Generate Allure Report') {
             steps {
-                sh 'allure generate target/allure-results --clean -o target/allure-report'
+                sh '''
+                if exist target\\allure-report rmdir /s /q target\\allure-report
+                if exist target\\allure-results rmdir /s /q target\\allure-results
+                mvn test
+                allure generate target/allure-results --clean -o target/allure-report
+                '''
             }
         }
     }
 
     post {
         always {
-            publishHTML([
-                reportDir: 'target/allure-report',
-                reportFiles: 'index.html',
-                reportName: 'Allure Test Report',
-                allowMissing: false,          // ✅ REQUIRED FIX
-                keepAll: true,
-                alwaysLinkToLastBuild: true
-            ])
-            echo 'Pipeline execution finished'
+            archiveArtifacts artifacts: 'target/allure-report/**', fingerprint: true
+            echo 'Allure report archived successfully'
         }
         success {
             echo 'Build SUCCESS'
