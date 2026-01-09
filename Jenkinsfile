@@ -21,14 +21,13 @@ pipeline {
                 bat 'mvn test -DsuiteXmlFile=testng.xml'
             }
         }
+    }
 
-        stage('Publish Allure Report') {
-            steps {
-                allure([
-                    reportBuildPolicy: 'ALWAYS',
-                    results: [[path: 'target/allure-results']]
-                ])
-            }
+    post {
+        always {
+            allure includeProperties: false,
+                   jdk: '',
+                   results: [[path: 'target/allure-results']]
         }
     }
 }
