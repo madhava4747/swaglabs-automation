@@ -1,17 +1,13 @@
-
 pipeline {
     agent any
 
     tools {
         maven 'Maven-LOCAL'
-        jdk   'JDK-Local'
-    }
-
-    environment {
-        MAVEN_OPTS = '-Dmaven.repo.local=.m2/repository'
+        jdk 'JDK-Local'
     }
 
     stages {
+
         stage('Checkout') {
             steps {
                 git branch: 'main',
@@ -22,37 +18,16 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                bat '''
-                mvn clean test ^
-                -Dsurefire.suiteXmlFiles=testng.xml
-                '''
-            }
-        }
-
-        // Optional: quick folder check if needed
-        stage('Verify Allure Folder') {
-            steps {
-                bat 'dir target'
-                bat 'dir target\\allure-results'
+                bat 'mvn test -DsuiteXmlFile=testng.xml'
             }
         }
     }
 
     post {
         always {
-            echo 'Publishing Allure report'
-            script {
-                allure(
-                    includeProperties: false,
-                    jdk: '',
-                    results: [[
-                        path: 'target/allure-results',
-                        reportBuildPolicy: 'ALWAYS'
-                    ]]
-                )
-            }
+            allureReport(
+                resultsPath: 'target/allure-results'
+            )
         }
-        success { echo '✅ Tests executed successfully' }
-        failure { echo '❌ Test execution failed' }
     }
 }
