@@ -8,7 +8,7 @@ pipeline {
 
     stages {
 
-        stage('Checkout Code') {
+        stage('Checkout the Code') {
             steps {
                 git branch: 'main',
                     url: 'https://github.com/madhava4747/swaglabs-automation.git',
