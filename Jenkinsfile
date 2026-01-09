@@ -21,13 +21,27 @@ pipeline {
                 bat 'mvn test -DsuiteXmlFile=testng.xml'
             }
         }
+
+        stage('Generate Allure Report') {
+            steps {
+                bat '''
+                if exist target\\allure-report rmdir /s /q target\\allure-report
+                allure generate target\\allure-results --clean -o target\\allure-report
+                '''
+            }
+        }
     }
 
     post {
         always {
-            allureReport(
-                resultsPath: 'target/allure-results'
-            )
+            publishHTML(target: [
+                reportName : 'Allure Report',
+                reportDir  : 'target/allure-report',
+                reportFiles: 'index.html',
+                keepAll    : true,
+                alwaysLinkToLastBuild: true,
+                allowMissing: false
+            ])
         }
     }
 }
