@@ -33,15 +33,23 @@ pipeline {
     }
 
     post {
-        always {
-            publishHTML(target: [
-                reportName : 'Allure Report',
-                reportDir  : 'target/allure-report',
-                reportFiles: 'index.html',
-                keepAll    : true,
-                alwaysLinkToLastBuild: true,
-                allowMissing: false
-            ])
+    always {
+        script {
+            if (fileExists('target/allure-report/index.html')) {
+                publishHTML(target: [
+                    reportName : 'Allure Report',
+                    reportDir  : 'target/allure-report',
+                    reportFiles: 'index.html',
+                    keepAll    : true,
+                    alwaysLinkToLastBuild: true,
+                    allowMissing: false
+                ])
+            } else {
+                echo 'Allure report not found'
+            }
         }
+    }
+}
+
     }
 }
