@@ -2,10 +2,10 @@
 <suite name="SauceDemo Suite" parallel="methods" thread-count="2">
 
     <listeners>
-        <!-- Allure Listener (MANDATORY) -->
+        <!-- ADD ONLY THIS -->
         <listener class-name="io.qameta.allure.testng.AllureTestNg"/>
 
-        <!-- Your Custom Listener -->
+        <!-- KEEP YOUR EXISTING LISTENER -->
         <listener class-name="automationpackage.Saucedemo.listeners.TestExecutionLogger"/>
     </listeners>
 
