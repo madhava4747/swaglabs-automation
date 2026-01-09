@@ -25,11 +25,7 @@ pipeline {
 
     post {
         always {
-            step([
-                $class: 'AllureReportPublisher',
-                reportBuildPolicy: 'ALWAYS',
-                results: [[path: 'target/allure-results']]
-            ])
+            allure results: [[path: 'target/allure-results']]
         }
     }
 }
