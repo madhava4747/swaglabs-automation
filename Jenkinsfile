@@ -8,17 +8,11 @@ pipeline {
 
     stages {
 
-        stage('Checkout the Code') {
+        stage('Checkout') {
             steps {
                 git branch: 'main',
                     url: 'https://github.com/madhava4747/swaglabs-automation.git',
                     credentialsId: 'github-creds'
-            }
-        }
-
-        stage('Clean & Compile') {
-            steps {
-                bat 'mvn clean compile'
             }
         }
 
@@ -28,30 +22,13 @@ pipeline {
             }
         }
 
-        stage('Generate Allure Report') {
+        stage('Publish Allure Report') {
             steps {
-                bat '''
-                if exist target\\allure-report rmdir /s /q target\\allure-report
-                if exist target\\allure-results (
-                    allure generate target\\allure-results --clean -o target\\allure-report
-                ) else (
-                    echo "No Allure results found"
-                )
-                '''
+                allure([
+                    reportBuildPolicy: 'ALWAYS',
+                    results: [[path: 'target/allure-results']]
+                ])
             }
-        }
-    }
-
-    post {
-        always {
-            archiveArtifacts artifacts: 'target/allure-report/**', fingerprint: true
-            echo 'Pipeline completed'
-        }
-        success {
-            echo 'Build SUCCESS'
-        }
-        failure {
-            echo 'Build FAILED'
         }
     }
 }
