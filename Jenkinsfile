@@ -1,3 +1,4 @@
+
 pipeline {
     agent any
 
@@ -25,9 +26,7 @@ pipeline {
 
     post {
         always {
-            allureReport(
-                resultsPath: 'target/allure-results'
-            )
+            allure results: [[path: 'target/allure-results']]
         }
     }
 }
