@@ -9,6 +9,7 @@ public class ProductPage extends BasePage {
     private final By title = By.className("title");
     private final By addToCart = By.id("add-to-cart-sauce-labs-backpack");
     private final By cartIcon = By.className("shopping_cart_link");
+    private final By errorMsg = By.cssSelector("[data-test='error']");
 
     public ProductPage(WebDriver driver) {
         super(driver);
@@ -29,4 +30,11 @@ public class ProductPage extends BasePage {
         TestLogCollector.log("INFO", "Navigating to cart page");
         click(cartIcon);
     }
+    
+	public boolean isAddToCartErrorDisplayed() {
+		boolean displayed = driver.findElements(errorMsg).size() > 0;
+        TestLogCollector.log("INFO", "Product error displayed: " + displayed);
+		// TODO Auto-generated method stub
+		return displayed;
+	}
 }
