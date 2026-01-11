@@ -8,6 +8,8 @@ public class OverviewPage extends BasePage {
 
     private final By title = By.className("title");
     private final By finishBtn = By.id("finish");
+    private final By errorMsg = By.cssSelector("[data-test='error']");
+   
 
     public OverviewPage(WebDriver driver) {
         super(driver);
@@ -23,4 +25,11 @@ public class OverviewPage extends BasePage {
         TestLogCollector.log("INFO", "Finishing order");
         click(finishBtn);
     }
+
+	public boolean isOverviewErrorDisplayed() {
+		boolean displayed = driver.findElements(errorMsg).size() > 0;
+        TestLogCollector.log("INFO", "Overview error displayed: " + displayed);
+		// TODO Auto-generated method stub
+		return displayed;
+	}
 }
