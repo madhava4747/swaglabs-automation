@@ -11,6 +11,9 @@ public class CheckoutPage extends BasePage {
     private final By lastName = By.id("last-name");
     private final By zip = By.id("postal-code");
     private final By continueBtn = By.id("continue");
+    private final static By errorMsg = By.cssSelector("[data-test='error']");
+    
+    
 
     public CheckoutPage(WebDriver driver) {
         super(driver);
@@ -32,5 +35,11 @@ public class CheckoutPage extends BasePage {
     public void clickContinue() {
         TestLogCollector.log("INFO", "Clicking Continue");
         click(continueBtn);
+    }
+
+    public static boolean isCheckoutErrorDisplayed() {
+        boolean displayed = driver.findElements(errorMsg).size() > 0;
+        TestLogCollector.log("INFO", "Checkout error displayed: " + displayed);
+        return displayed;
     }
 }
