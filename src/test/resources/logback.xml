@@ -14,18 +14,27 @@
         </rollingPolicy>
 
         <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger - %msg%n</pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %msg%n</pattern>
         </encoder>
     </appender>
 
-    <!-- Console Appender -->
+    <!-- Console Appender (CLEAN) -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{HH:mm:ss} [%thread] %-5level %logger - %msg%n</pattern>
+            <pattern>%d{HH:mm:ss} %-5level %msg%n</pattern>
         </encoder>
     </appender>
 
-    <!-- Root Logger -->
+    <!-- 🔕 Silence Selenium -->
+    <logger name="org.openqa.selenium" level="ERROR"/>
+
+    <!-- 🔕 Silence TestNG -->
+    <logger name="org.testng" level="ERROR"/>
+
+    <!-- 🔕 Silence Maven internals -->
+    <logger name="org.apache.maven" level="ERROR"/>
+
+    <!-- Root Logger (ONLY YOUR LOGS) -->
     <root level="INFO">
         <appender-ref ref="FILE"/>
         <appender-ref ref="CONSOLE"/>
