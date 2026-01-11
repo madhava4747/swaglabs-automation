@@ -37,7 +37,7 @@ public class CheckoutPage extends BasePage {
         click(continueBtn);
     }
 
-    public static boolean isCheckoutErrorDisplayed() {
+    public boolean isCheckoutErrorDisplayed() {
         boolean displayed = driver.findElements(errorMsg).size() > 0;
         TestLogCollector.log("INFO", "Checkout error displayed: " + displayed);
         return displayed;
