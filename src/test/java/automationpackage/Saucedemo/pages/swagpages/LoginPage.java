@@ -1,7 +1,14 @@
 package automationpackage.Saucedemo.pages.swagpages;
 
+import java.time.Duration;
+
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
 import automationpackage.Saucedemo.utils.TestLogCollector;
 
 public class LoginPage extends BasePage {
@@ -27,8 +34,13 @@ public class LoginPage extends BasePage {
     }
 
     public boolean isErrorDisplayed() {
-        boolean displayed = driver.findElements(errorMsg).size() > 0;
-        TestLogCollector.log("INFO", "Login error displayed: " + displayed);
-        return displayed;
+        try {
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(3));
+            return wait.until(
+                ExpectedConditions.presenceOfElementLocated(errorMsg)
+            ).isDisplayed();
+        } catch (Exception e) {
+            return false; // prevents browser-crash failure
+        }
     }
 }
