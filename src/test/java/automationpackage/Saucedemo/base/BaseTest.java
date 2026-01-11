@@ -12,7 +12,8 @@ import io.qameta.allure.Allure;
 import automationpackage.Saucedemo.utils.*;
 
 public class BaseTest {
-
+	private static ThreadLocal<WebDriver> driver = new ThreadLocal<>();
+	
     @BeforeSuite(alwaysRun = true)
     public void beforeSuite() throws IOException {
 
