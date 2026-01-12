@@ -6,6 +6,12 @@ pipeline {
         jdk 'JDK-Local'
     }
 
+    parameters {
+        choice(name: 'ENV', choices: ['qa', 'dev', 'prod'], description: 'Select Environment')
+        choice(name: 'BROWSER', choices: ['chrome', 'firefox'], description: 'Select Browser')
+        choice(name: 'SUITE', choices: ['smoke', 'regression'], description: 'Select Test Suite')
+    }
+
     stages {
 
         stage('Checkout') {
@@ -18,7 +24,14 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                bat 'mvn test -DsuiteXmlFile=testng.xml'
+                echo "ENV=${params.ENV}, BROWSER=${params.BROWSER}, SUITE=${params.SUITE}"
+
+                bat """
+                mvn clean test ^
+                -Denv=${params.ENV} ^
+                -Dbrowser=${params.BROWSER} ^
+                -Dsuite=${params.SUITE}
+                """
             }
         }
 
