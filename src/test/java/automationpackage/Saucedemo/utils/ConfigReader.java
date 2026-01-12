@@ -1,7 +1,7 @@
 package automationpackage.Saucedemo.utils;
 
-import java.util.Properties;
 import java.io.InputStream;
+import java.util.Properties;
 
 public class ConfigReader {
 
@@ -9,21 +9,25 @@ public class ConfigReader {
 
     static {
         try {
+            // Read env from Jenkins / Maven
+            String env = System.getProperty("env", "qa");
+
+            String fileName = "config/" + env + ".properties";
+
             InputStream is = ConfigReader.class
                     .getClassLoader()
-                    .getResourceAsStream("config.properties");
+                    .getResourceAsStream(fileName);
 
             if (is == null) {
                 throw new RuntimeException(
-                        "config.properties not found. " +
-                        "Make sure it is placed under src/test/resources"
+                        fileName + " not found. Make sure it exists under src/test/resources/config"
                 );
             }
 
             prop.load(is);
 
         } catch (Exception e) {
-            throw new RuntimeException("Config load failed", e);
+            throw new RuntimeException("Failed to load environment config", e);
         }
     }
 
@@ -34,7 +38,7 @@ public class ConfigReader {
     public static String get(String key) {
         String value = prop.getProperty(key);
         if (value == null) {
-            throw new RuntimeException("Property not found in config.properties: " + key);
+            throw new RuntimeException("Property not found: " + key);
         }
         return value.trim();
     }
