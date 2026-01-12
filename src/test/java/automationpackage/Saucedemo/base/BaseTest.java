@@ -12,8 +12,7 @@ import io.qameta.allure.Allure;
 import automationpackage.Saucedemo.utils.*;
 
 public class BaseTest {
-	private static ThreadLocal<WebDriver> driver = new ThreadLocal<>();
-	
+
     @BeforeSuite(alwaysRun = true)
     public void beforeSuite() throws IOException {
 
@@ -22,37 +21,52 @@ public class BaseTest {
         Path allureResults = Paths.get("target", "allure-results");
         Files.createDirectories(allureResults);
 
+        String env = System.getProperty("env", "qa");
+        String browser = System.getProperty("browser", "chrome");
+
         Files.writeString(
                 allureResults.resolve("environment.properties"),
                 String.format(
-                        "Environment=QA%nBaseURL=%s%nBrowser=Edge%nTester=Madhav%n",
-                        ConfigReader.get("baseUrl")
+                        "Environment=%s%nBaseURL=%s%nBrowser=%s%nTester=Madhav%n",
+                        env,
+                        ConfigReader.get("base.url"),
+                        browser
                 )
         );
     }
 
-    @Parameters("browser")
     @BeforeMethod(alwaysRun = true)
-    public void setup(@Optional("edge") String browser) {
+    public void setup() {
+
+        String browser = System.getProperty("browser", "chrome");
+        boolean headless = Boolean.parseBoolean(
+                ConfigReader.get("headless")
+        );
 
         TestLogCollector.log(
                 "INFO",
                 "Browser started: " + browser +
+                        " | Headless: " + headless +
                         " | Thread: " + Thread.currentThread().getName()
         );
 
-        DriverFactory.getDriver(browser)
-                .get(ConfigReader.get("baseUrl"));
+        DriverFactory
+                .getDriver(browser, headless)
+                .get(ConfigReader.get("base.url"));
     }
 
     protected WebDriver getDriver() {
-        return DriverFactory.getDriver(null);
+        return DriverFactory.getDriver(
+                System.getProperty("browser", "chrome"),
+                Boolean.parseBoolean(ConfigReader.get("headless"))
+        );
     }
 
     @AfterMethod(alwaysRun = true)
     public void tearDown(ITestResult result) {
 
         if (result.getStatus() == ITestResult.FAILURE) {
+
             TestLogCollector.log(
                     "FAIL",
                     "TEST FAILED: " + result.getName() +
@@ -69,17 +83,11 @@ public class BaseTest {
         }
 
         if (result.getStatus() == ITestResult.SUCCESS) {
-            TestLogCollector.log(
-                    "PASS",
-                    "TEST PASSED: " + result.getName()
-            );
+            TestLogCollector.log("PASS", "TEST PASSED: " + result.getName());
         }
 
         if (result.getStatus() == ITestResult.SKIP) {
-            TestLogCollector.log(
-                    "SKIP",
-                    "TEST SKIPPED: " + result.getName()
-            );
+            TestLogCollector.log("SKIP", "TEST SKIPPED: " + result.getName());
         }
 
         DriverFactory.quitDriver();
@@ -87,7 +95,6 @@ public class BaseTest {
 
     @AfterSuite(alwaysRun = true)
     public void afterSuite() {
-
         TestLogCollector.log("INFO", "===== TEST SUITE FINISHED =====");
         TestLogCollector.flushToFile();
     }
