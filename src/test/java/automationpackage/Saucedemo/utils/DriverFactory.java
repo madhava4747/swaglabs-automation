@@ -24,7 +24,16 @@ public class DriverFactory {
             switch (browser.toLowerCase()) {
 
                 case "edge":
-                    WebDriverManager.edgedriver().setup();
+                    // ✅ OFFLINE EDGE DRIVER (NO INTERNET REQUIRED)
+                    String edgeDriverPath = System.getenv("EDGE_DRIVER_PATH");
+
+                    if (edgeDriverPath == null) {
+                        throw new RuntimeException(
+                            "EDGE_DRIVER_PATH environment variable is not set"
+                        );
+                    }
+
+                    System.setProperty("webdriver.edge.driver", edgeDriverPath);
 
                     EdgeOptions edgeOptions = new EdgeOptions();
                     if (headless) {
@@ -45,7 +54,8 @@ public class DriverFactory {
                     driver.set(new FirefoxDriver(firefoxOptions));
                     break;
 
-                default: // chrome
+                case "chrome":
+                default:
                     WebDriverManager.chromedriver().setup();
 
                     ChromeOptions chromeOptions = new ChromeOptions();
