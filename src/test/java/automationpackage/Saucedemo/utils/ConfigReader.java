@@ -12,7 +12,7 @@ public class ConfigReader {
             // Read env from Jenkins / Maven
             String env = System.getProperty("env", "qa");
 
-            String fileName = "config/" + env + ".properties";
+            String fileName = env + ".properties";
 
             InputStream is = ConfigReader.class
                     .getClassLoader()
