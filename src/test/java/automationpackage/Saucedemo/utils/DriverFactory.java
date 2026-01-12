@@ -8,6 +8,8 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.edge.EdgeOptions;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxOptions;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
 
@@ -15,35 +17,51 @@ public class DriverFactory {
 
     private static ThreadLocal<WebDriver> driver = new ThreadLocal<>();
 
-    public static WebDriver getDriver(String browser) {
+    public static WebDriver getDriver(String browser, boolean headless) {
 
         if (driver.get() == null) {
 
-        	if (browser.equalsIgnoreCase("edge")) {
+            switch (browser.toLowerCase()) {
 
-        	    System.setProperty(
-        	        "webdriver.edge.driver",
-        	        "C:\\Users\\MadhavaraoManchi\\eclipse-workspace\\edgedriver_win64\\msedgedriver.exe"
-        	    );
+                case "edge":
+                    WebDriverManager.edgedriver().setup();
 
-        	    EdgeOptions options = new EdgeOptions();
-        	    driver.set(new EdgeDriver(options));
-        	}
-        	
-        	else {
-                // Default: Chrome
-                WebDriverManager.chromedriver().setup();
+                    EdgeOptions edgeOptions = new EdgeOptions();
+                    if (headless) {
+                        edgeOptions.addArguments("--headless=new");
+                    }
 
-                ChromeOptions options = new ChromeOptions();
-                options.addArguments("--incognito");
-                options.addArguments("--disable-notifications");
+                    driver.set(new EdgeDriver(edgeOptions));
+                    break;
 
-                Map<String, Object> prefs = new HashMap<>();
-                prefs.put("credentials_enable_service", false);
-                prefs.put("profile.password_manager_enabled", false);
-                options.setExperimentalOption("prefs", prefs);
+                case "firefox":
+                    WebDriverManager.firefoxdriver().setup();
 
-                driver.set(new ChromeDriver(options));
+                    FirefoxOptions firefoxOptions = new FirefoxOptions();
+                    if (headless) {
+                        firefoxOptions.addArguments("-headless");
+                    }
+
+                    driver.set(new FirefoxDriver(firefoxOptions));
+                    break;
+
+                default: // chrome
+                    WebDriverManager.chromedriver().setup();
+
+                    ChromeOptions chromeOptions = new ChromeOptions();
+                    chromeOptions.addArguments("--incognito");
+                    chromeOptions.addArguments("--disable-notifications");
+
+                    if (headless) {
+                        chromeOptions.addArguments("--headless=new");
+                    }
+
+                    Map<String, Object> prefs = new HashMap<>();
+                    prefs.put("credentials_enable_service", false);
+                    prefs.put("profile.password_manager_enabled", false);
+                    chromeOptions.setExperimentalOption("prefs", prefs);
+
+                    driver.set(new ChromeDriver(chromeOptions));
             }
 
             driver.get().manage().window().maximize();
