@@ -1,66 +1,42 @@
 pipeline {
     agent any
 
-    tools {
-        maven 'Maven-LOCAL'
-        jdk 'JDK-Local'
+    options {
+        skipDefaultCheckout(true)
     }
 
     parameters {
-        choice(name: 'ENV', choices: ['qa', 'dev', 'prod'], description: 'Select Environment')
-        choice(name: 'BROWSER', choices: ['chrome', 'firefox'], description: 'Select Browser')
-        choice(name: 'SUITE', choices: ['smoke', 'regression'], description: 'Select Test Suite')
+        choice(name: 'ENV', choices: ['qa','stage'])
+        choice(name: 'BROWSER', choices: ['chrome','edge'])
+        choice(name: 'SUITE', choices: ['smoke','regression'])
     }
 
     stages {
-
         stage('Checkout') {
             steps {
-                git branch: 'main',
-                    url: 'https://github.com/madhava4747/swaglabs-automation.git',
-                    credentialsId: 'github-creds'
+                checkout scm
             }
         }
 
         stage('Run Tests') {
             steps {
-                echo "ENV=${params.ENV}, BROWSER=${params.BROWSER}, SUITE=${params.SUITE}"
-
-                bat """
-                mvn clean test ^
-                -Denv=${params.ENV} ^
-                -Dbrowser=${params.BROWSER} ^
-                -Dsuite=${params.SUITE}
-                """
+                bat "mvn clean test -Denv=${params.ENV} -Dbrowser=${params.BROWSER} -Dsuite=${params.SUITE}"
             }
         }
 
-        stage('Generate Allure Report') {
+        stage('Allure Report') {
             steps {
-                bat '''
-                if exist target\\allure-report rmdir /s /q target\\allure-report
-                allure generate target\\allure-results --clean -o target\\allure-report
-                '''
+                allure results: [[path: 'target/allure-results']]
             }
         }
     }
 
     post {
-        always {
-            script {
-                if (fileExists('target/allure-report/index.html')) {
-                    publishHTML(target: [
-                        reportName : 'Allure Report',
-                        reportDir  : 'target/allure-report',
-                        reportFiles: 'index.html',
-                        keepAll    : true,
-                        alwaysLinkToLastBuild: true,
-                        allowMissing: false
-                    ])
-                } else {
-                    echo 'Allure report not found'
-                }
-            }
+        success {
+            echo '✅ Build Success'
+        }
+        failure {
+            echo '❌ Build Failed'
         }
     }
 }
