@@ -1,61 +1,66 @@
 pipeline {
     agent any
 
-    options {
-        skipDefaultCheckout(true)
-    }
-
     tools {
         maven 'Maven-LOCAL'
         jdk 'JDK-Local'
     }
 
-    triggers {
-        pollSCM('H/5 * * * *')
-    }
-
     parameters {
-        choice(name: 'ENV', choices: ['qa', 'dev', 'prod'])
-        choice(name: 'BROWSER', choices: ['chrome', 'firefox'])
-        choice(name: 'SUITE', choices: ['smoke', 'regression'])
+        choice(name: 'ENV', choices: ['qa', 'dev', 'prod'], description: 'Select Environment')
+        choice(name: 'BROWSER', choices: ['chrome', 'firefox'], description: 'Select Browser')
+        choice(name: 'SUITE', choices: ['smoke', 'regression'], description: 'Select Test Suite')
     }
 
     stages {
 
         stage('Checkout') {
             steps {
-                checkout scm
+                git branch: 'main',
+                    url: 'https://github.com/madhava4747/swaglabs-automation.git',
+                    credentialsId: 'github-creds'
             }
         }
 
         stage('Run Tests') {
             steps {
+                echo "ENV=${params.ENV}, BROWSER=${params.BROWSER}, SUITE=${params.SUITE}"
+
                 bat """
                 mvn clean test ^
                 -Denv=${params.ENV} ^
                 -Dbrowser=${params.BROWSER} ^
-                -Dsuite=${params.SUITE} ^
-                -Dbrowser.mode=headless
+                -Dsuite=${params.SUITE}
                 """
             }
         }
 
-        stage('Allure Report') {
+        stage('Generate Allure Report') {
             steps {
-                allure results: [[path: 'target/allure-results']]
+                bat '''
+                if exist target\\allure-report rmdir /s /q target\\allure-report
+                allure generate target\\allure-results --clean -o target\\allure-report
+                '''
             }
         }
     }
 
     post {
-        success {
-            echo '✅ Build Passed'
-        }
-        failure {
-            echo '❌ Build Failed'
-        }
         always {
-            echo '📊 Pipeline finished'
+            script {
+                if (fileExists('target/allure-report/index.html')) {
+                    publishHTML(target: [
+                        reportName : 'Allure Report',
+                        reportDir  : 'target/allure-report',
+                        reportFiles: 'index.html',
+                        keepAll    : true,
+                        alwaysLinkToLastBuild: true,
+                        allowMissing: false
+                    ])
+                } else {
+                    echo 'Allure report not found'
+                }
+            }
         }
     }
 }
