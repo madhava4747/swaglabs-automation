@@ -5,13 +5,23 @@ pipeline {
         skipDefaultCheckout(true)
     }
 
+    tools {
+        maven 'Maven-LOCAL'
+        jdk 'JDK-Local'
+    }
+
+    triggers {
+        pollSCM('H/5 * * * *')
+    }
+
     parameters {
-        choice(name: 'ENV', choices: ['qa','stage'])
-        choice(name: 'BROWSER', choices: ['chrome','edge'])
-        choice(name: 'SUITE', choices: ['smoke','regression'])
+        choice(name: 'ENV', choices: ['qa', 'dev', 'prod'])
+        choice(name: 'BROWSER', choices: ['chrome', 'firefox'])
+        choice(name: 'SUITE', choices: ['smoke', 'regression'])
     }
 
     stages {
+
         stage('Checkout') {
             steps {
                 checkout scm
@@ -20,7 +30,13 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                bat "mvn clean test -Denv=${params.ENV} -Dbrowser=${params.BROWSER} -Dsuite=${params.SUITE}"
+                bat """
+                mvn clean test ^
+                -Denv=${params.ENV} ^
+                -Dbrowser=${params.BROWSER} ^
+                -Dsuite=${params.SUITE} ^
+                -Dbrowser.mode=headless
+                """
             }
         }
 
@@ -33,10 +49,13 @@ pipeline {
 
     post {
         success {
-            echo '✅ Build Success'
+            echo '✅ Build Passed'
         }
         failure {
             echo '❌ Build Failed'
+        }
+        always {
+            echo '📊 Pipeline finished'
         }
     }
 }
